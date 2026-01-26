@@ -1,0 +1,174 @@
+const boardEl = document.querySelector("#board");
+const statusEl = document.querySelector("#status");
+const resetBtn = document.querySelector("#resetBtn");
+const HUMAN = "X";
+const COMPUTER = "O";
+let aiMode = "heuristic";
+
+let board;        // array of 9: null | "X" | "O"
+let current;      // "X" or "O"
+let gameOver;     // boolean
+
+const WIN_LINES = [
+    [0,1,2],[3,4,5],[6,7,8], // rows
+    [0,3,6],[1,4,7],[2,5,8], // cols
+    [0,4,8],[2,4,6]          // diagonals
+];
+
+function init() {
+    board = Array(9).fill(null);
+    current = "HUMAN";
+    gameOver = false;
+
+    // build 9 clickable cells at once
+    boardEl.innerHTML = "";
+    for (let i = 0; i < 9; i++) {
+        const btn = document.createElement("button");
+        btn.className = "cell";
+        btn.type = "button";
+        btn.dataset.index = String(i);
+        btn.setAttribute("role", "grid-cell");
+        btn.setAttribute("aria-label", `Cell ${i + 1}`);
+        btn.addEventListener("click", onCellClick);
+        boardEl.appendChild(btn);
+    }
+
+    updateStatus();
+    render();
+}
+
+function bestMoveHeuristic(b, player) {
+    const opponent = player === "X" ? "O" : "X";
+
+    // 1) Win
+    let move = findWinningMove(b, player);
+    if (move != null) return move;
+
+    // 2) Block
+    move = findWinningMove(b, opponent);
+    if (move != null) return move;
+
+    // 3) Center
+    if (b[4] == null) return 4;
+
+    // 4) Corners
+    const corners = [0, 2, 6, 8].filter(i => b[i] == null);
+    if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+
+    // 5) Sides
+    const sides = [1, 3, 5, 7].filter(i => b[i] == null);
+    if (sides.length) return sides[Math.floor(Math.random() * sides.length)];
+
+    return null;
+}
+
+function findWinningMove(b, player) {
+    for (const line of WIN_LINES) {
+        const [a, c, d] = line;
+        const cells = [b[a], b[c], b[d]];
+
+        // If a player has 2 in the line and one empty, play the empty
+        const countPlayer = cells.filter(x => x === player).length;
+        const countEmpty = cells.filter(x => x == null).length;
+        if (countPlayer === 2 && countEmpty === 1) {
+            if (b[a] == null) return a;
+            if (b[c] == null) return c;
+            return d;
+        }
+    }
+    return null;
+}
+
+function aiMove() {
+    if (gameOver) return;
+
+    let idx;
+    if (aiMode === "minimax") idx = bestMoveMinimax(board, COMPUTER);
+    else idx = bestMoveHeuristic(board, COMPUTER);
+
+    if (idx == null) return;
+
+    board[idx] = COMPUTER;
+
+    const result = getResult(board);
+    if (result.type !== "none") {
+        gameOver = true;
+        render(result.winLine);
+        updateStatus(result);
+        return;
+    }
+
+    current = HUMAN;
+    render();
+    updateStatus();
+}
+
+
+function onCellClick(e) {
+    if (current !== HUMAN) return;
+    if (gameOver) return;
+
+    const idx = Number(e.currentTarget.dataset.index);
+    if (board[idx] !== null) return; // already played
+
+    board[idx] = current;
+
+    const result = getResult(board);
+    if (result.type !== "none") {
+        gameOver = true;
+        render(result.winLine); // highlight win line if any
+        updateStatus(result);
+        return;
+    }
+
+    current = current === "X" ? "O" : "X";
+    render();
+    updateStatus();
+
+    // If it's AI's turn, let AI move after a tiny delay (feels natural)
+    if (!gameOver && current === COMPUTER) {
+        setTimeout(aiMove, 200);
+    }
+}
+
+function getResult(b) {
+    for (const line of WIN_LINES) {
+        const [a,c,d] = line;
+        if (b[a] && b[a] === b[c] && b[a] === b[d]) {
+            return { type: "win", winner: b[a], winLine: line };
+        }
+    }
+    if (b.every(x => x !== null)) {
+        return { type: "draw" };
+    }
+    return { type: "none" };
+}
+
+function render(winLine = null) {
+    const cells = boardEl.querySelectorAll(".cell");
+    cells.forEach((cell, i) => {
+        cell.textContent = board[i] ?? "";
+        cell.classList.remove("win");
+        cell.setAttribute("aria-disabled", gameOver ? "true" : "false");
+    });
+
+    if (winLine) {
+        for (const i of winLine) cells[i].classList.add("win");
+    }
+}
+
+function updateStatus(result = null) {
+    if (!result || result.type === "none") {
+        statusEl.textContent = `Turn: ${current}`;
+        return;
+    }
+    if (result.type === "win") {
+        statusEl.textContent = `Winner: ${result.winner} 🎉`;
+        return;
+    }
+    statusEl.textContent = "Issa draw :(";
+}
+
+resetBtn.addEventListener("click", init);
+
+init();
