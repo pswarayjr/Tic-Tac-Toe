@@ -1,11 +1,17 @@
 const boardEl = document.querySelector("#board");
 const statusEl = document.querySelector("#status");
 const resetBtn = document.querySelector("#resetBtn");
-const HUMAN = "X";
-const COMPUTER = "O";
+const aiIndicator = document.querySelector("#aiIndicator");
+const startSelect = document.querySelector("#startSelect");
+let HUMAN = "X";
+let COMPUTER = "O";
 const modeSelect = document.querySelector("#modeSelect");
 modeSelect.addEventListener("change", () => {
     aiMode = modeSelect.value;
+    aiIndicator.textContent = `Model: ${aiMode === "minimax" ? "Minimax" : "Heuristic"}`;
+    init();
+});
+startSelect.addEventListener("change", () => {
     init();
 });
 let aiMode = "heuristic";
@@ -22,8 +28,16 @@ const WIN_LINES = [
 
 function init() {
     board = Array(9).fill(null);
-    current = HUMAN;
+    current = "X"; // X always goes first
     gameOver = false;
+
+    if (startSelect.value === "human") {
+        HUMAN = "X";
+        COMPUTER = "O";
+    } else {
+        HUMAN = "O";
+        COMPUTER = "X";
+    }
 
     // build 9 clickable cells at once
     boardEl.innerHTML = "";
@@ -40,6 +54,11 @@ function init() {
 
     updateStatus();
     render();
+
+    // If AI starts (it is X), trigger its move
+    if (current === COMPUTER) {
+        setTimeout(makeAiMove, 200);
+    }
 }
 
 function bestMoveHeuristic(b, player) {
@@ -149,20 +168,8 @@ function makeAiMove() {
     if (idx == null) return;
 
     board[idx] = COMPUTER;
-
-    const result = getResult(board);
-    if (result.type !== "none") {
-        gameOver = true;
-        render(result.winLine);
-        updateStatus(result);
-        return;
-    }
-
-    current = HUMAN;
-    render();
-    updateStatus();
+    checkGameStatus();
 }
-
 
 function onCellClick(e) {
     if (current !== HUMAN) return;
@@ -172,7 +179,15 @@ function onCellClick(e) {
     if (board[idx] !== null) return; // already played
 
     board[idx] = current;
+    checkGameStatus();
 
+    // If it's AI's turn, let AI move after a tiny delay
+    if (!gameOver && current === COMPUTER) {
+        setTimeout(makeAiMove, 200);
+    }
+}
+
+function checkGameStatus() {
     const result = getResult(board);
     if (result.type !== "none") {
         gameOver = true;
@@ -184,11 +199,6 @@ function onCellClick(e) {
     current = current === "X" ? "O" : "X";
     render();
     updateStatus();
-
-    // If it's AI's turn, let AI move after a tiny delay (feels natural)
-    if (!gameOver && current === COMPUTER) {
-        setTimeout(makeAiMove, 200);
-    }
 }
 
 function getResult(b) {
@@ -226,7 +236,7 @@ function updateStatus(result = null) {
         statusEl.textContent = `Winner: ${result.winner} 🎉`;
         return;
     }
-    statusEl.textContent = "Issa draw :(";
+    statusEl.textContent = "It's a draw :(";
 }
 
 resetBtn.addEventListener("click", init);
