@@ -3,6 +3,11 @@ const statusEl = document.querySelector("#status");
 const resetBtn = document.querySelector("#resetBtn");
 const HUMAN = "X";
 const COMPUTER = "O";
+const modeSelect = document.querySelector("#modeSelect");
+modeSelect.addEventListener("change", () => {
+    aiMode = modeSelect.value;
+    init();
+});
 let aiMode = "heuristic";
 
 let board;        // array of 9: null | "X" | "O"
@@ -17,7 +22,7 @@ const WIN_LINES = [
 
 function init() {
     board = Array(9).fill(null);
-    current = "HUMAN";
+    current = HUMAN;
     gameOver = false;
 
     // build 9 clickable cells at once
@@ -79,7 +84,62 @@ function findWinningMove(b, player) {
     return null;
 }
 
-function aiMove() {
+function bestMoveMinimax(b, player) {
+    let bestScore = -Infinity;
+    let bestIdx = null;
+
+    for (let i = 0; i < 9; i++) {
+        if (b[i] != null) continue;
+
+        b[i] = player;
+        const score = minimax(b, 0, false, player);
+        b[i] = null;
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestIdx = i;
+        }
+    }
+
+    return bestIdx;
+}
+
+// player = AI symbol ("O" in our setup)
+function minimax(b, depth, isMaximizing, player) {
+    const opponent = player === "X" ? "O" : "X";
+    const res = getResult(b);
+
+    if (res.type === "win") {
+        // If AI wins -> positive. If AI loses -> negative.
+        return res.winner === player ? (10 - depth) : (depth - 10);
+    }
+    if (res.type === "draw") return 0;
+
+    if (isMaximizing) {
+        // AI turn: maximize score
+        let best = -Infinity;
+        for (let i = 0; i < 9; i++) {
+            if (b[i] != null) continue;
+            b[i] = player;
+            best = Math.max(best, minimax(b, depth + 1, false, player));
+            b[i] = null;
+        }
+        return best;
+    } else {
+        // Human turn: minimize score
+        let best = Infinity;
+        for (let i = 0; i < 9; i++) {
+            if (b[i] != null) continue;
+            b[i] = opponent;
+            best = Math.min(best, minimax(b, depth + 1, true, player));
+            b[i] = null;
+        }
+        return best;
+    }
+}
+
+
+function makeAiMove() {
     if (gameOver) return;
 
     let idx;
@@ -127,7 +187,7 @@ function onCellClick(e) {
 
     // If it's AI's turn, let AI move after a tiny delay (feels natural)
     if (!gameOver && current === COMPUTER) {
-        setTimeout(aiMove, 200);
+        setTimeout(makeAiMove, 200);
     }
 }
 
