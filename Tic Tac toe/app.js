@@ -64,6 +64,12 @@ function init() {
 function bestMoveHeuristic(b, player) {
     const opponent = player === "X" ? "O" : "X";
 
+    // To make it "Simple", let's give it a 40% chance to just move randomly
+    if (Math.random() < 0.4) {
+        const available = b.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
+        return available[Math.floor(Math.random() * available.length)];
+    }
+
     // 1) Win
     let move = findWinningMove(b, player);
     if (move != null) return move;
