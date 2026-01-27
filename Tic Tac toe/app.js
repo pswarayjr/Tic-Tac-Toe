@@ -3,6 +3,7 @@ const statusEl = document.querySelector("#status");
 const resetBtn = document.querySelector("#resetBtn");
 const aiIndicator = document.querySelector("#aiIndicator");
 const startSelect = document.querySelector("#startSelect");
+const symbolSelect = document.querySelector("#symbolSelect");
 let HUMAN = "X";
 let COMPUTER = "O";
 const modeSelect = document.querySelector("#modeSelect");
@@ -12,6 +13,9 @@ modeSelect.addEventListener("change", () => {
     init();
 });
 startSelect.addEventListener("change", () => {
+    init();
+});
+symbolSelect.addEventListener("change", () => {
     init();
 });
 let aiMode = "heuristic";
@@ -28,15 +32,16 @@ const WIN_LINES = [
 
 function init() {
     board = Array(9).fill(null);
-    current = "X"; // X always goes first
     gameOver = false;
 
+    HUMAN = symbolSelect.value;
+    COMPUTER = HUMAN === "X" ? "O" : "X";
+
+    // "X" always goes first in this logic, but let's decide based on startSelect
     if (startSelect.value === "human") {
-        HUMAN = "X";
-        COMPUTER = "O";
+        current = HUMAN;
     } else {
-        HUMAN = "O";
-        COMPUTER = "X";
+        current = COMPUTER;
     }
 
     // build 9 clickable cells at once
@@ -235,11 +240,13 @@ function render(winLine = null) {
 
 function updateStatus(result = null) {
     if (!result || result.type === "none") {
-        statusEl.textContent = `Turn: ${current}`;
+        const label = current === HUMAN ? "Human" : "Computer";
+        statusEl.textContent = `Turn: ${current} (${label})`;
         return;
     }
     if (result.type === "win") {
-        statusEl.textContent = `Winner: ${result.winner} 🎉`;
+        const label = result.winner === HUMAN ? "Human" : "Computer";
+        statusEl.textContent = `Winner: ${result.winner} (${label}) 🎉`;
         return;
     }
     statusEl.textContent = "It's a draw :(";

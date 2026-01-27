@@ -13,6 +13,7 @@
       .cell { height: 100px; font-size: 2rem; display: flex; align-items: center; justify-content: center; border: 1px solid #ff0000; background: #fbb000; }
       .cell:hover { background: #ff0000; }
       .win { background: #00ff3c; border-color: #000000; }
+      .footer { text-align: center; margin-top: 30px; font-size: 1.5rem; font-weight: bold; }
       </style>
 </head>
 <body>
@@ -28,9 +29,15 @@
           <option value="human">Player Starts</option>
           <option value="ai">AI Starts</option>
       </select>
+      <label for="symbolSelect">Symbol: </label><select id="symbolSelect">
+          <option value="X">Play as X</option>
+          <option value="O">Play as O</option>
+      </select>
   </div>
 
   <div class="board" id="board" role="grid" aria-label="Tic Tac Toe Board"></div>
+
+  <div class="footer">Tic Tac Toe</div>
 
   <script src="./app.js"></script>
 </body>
