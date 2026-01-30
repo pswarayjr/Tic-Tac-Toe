@@ -9,14 +9,32 @@ const computerScoreEl = document.querySelector("#computerScore");
 const tieScoreEl = document.querySelector("#tieScore");
 const humanLabelEl = document.querySelector("#humanLabel");
 const computerLabelEl = document.querySelector("#computerLabel");
+const onePlayerBtn = document.querySelector("#onePlayerBtn");
+const twoPlayerBtn = document.querySelector("#twoPlayerBtn");
 
 let humanScore = 0;
 let computerScore = 0;
 let tieScore = 0;
+let gameMode = "onePlayer"; // "onePlayer" or "twoPlayer"
 
 let HUMAN = "X";
 let COMPUTER = "O";
 const modeSelect = document.querySelector("#modeSelect");
+
+onePlayerBtn.addEventListener("click", () => {
+    gameMode = "onePlayer";
+    onePlayerBtn.classList.add("active");
+    twoPlayerBtn.classList.remove("active");
+    init();
+});
+
+twoPlayerBtn.addEventListener("click", () => {
+    gameMode = "twoPlayer";
+    twoPlayerBtn.classList.add("active");
+    onePlayerBtn.classList.remove("active");
+    init();
+});
+
 modeSelect.addEventListener("change", () => {
     aiMode = modeSelect.value;
     aiIndicator.textContent = `Model: ${aiMode === "minimax" ? "Minimax" : "Heuristic"}`;
@@ -47,14 +65,39 @@ function init() {
     HUMAN = symbolSelect.value;
     COMPUTER = HUMAN === "X" ? "O" : "X";
 
-    humanLabelEl.textContent = `PLAYER (${HUMAN})`;
-    computerLabelEl.textContent = `COMPUTER (${COMPUTER})`;
+    if (gameMode === "onePlayer") {
+        humanLabelEl.textContent = `PLAYER (${HUMAN})`;
+        computerLabelEl.textContent = `COMPUTER (${COMPUTER})`;
+        aiIndicator.style.display = "block";
+        
+        modeSelect.style.display = "inline";
+        document.querySelector('label[for="modeSelect"]').style.display = "inline";
+        
+        startSelect.style.display = "inline";
+        document.querySelector('label[for="startSelect"]').style.display = "inline";
+        
+        symbolSelect.style.display = "inline";
+        document.querySelector('label[for="symbolSelect"]').style.display = "inline";
 
-    // "X" always goes first in this logic, but let's decide based on startSelect
-    if (startSelect.value === "human") {
-        current = HUMAN;
+        if (startSelect.value === "human") {
+            current = HUMAN;
+        } else {
+            current = COMPUTER;
+        }
     } else {
-        current = COMPUTER;
+        // twoPlayer mode
+        humanLabelEl.textContent = `PLAYER 1 (X)`;
+        computerLabelEl.textContent = `PLAYER 2 (O)`;
+        aiIndicator.style.display = "none";
+        modeSelect.style.display = "none";
+        // Hide labels too
+        document.querySelector('label[for="modeSelect"]').style.display = "none";
+        document.querySelector('label[for="startSelect"]').style.display = "none";
+        startSelect.style.display = "none";
+        document.querySelector('label[for="symbolSelect"]').style.display = "none";
+        symbolSelect.style.display = "none";
+
+        current = "X";
     }
 
     // build 9 clickable cells at once
@@ -74,7 +117,7 @@ function init() {
     render();
 
     // If AI starts (it is X), trigger its move
-    if (current === COMPUTER) {
+    if (gameMode === "onePlayer" && current === COMPUTER) {
         setTimeout(makeAiMove, 200);
     }
 }
@@ -196,7 +239,7 @@ function makeAiMove() {
 }
 
 function onCellClick(e) {
-    if (current !== HUMAN) return;
+    if (gameMode === "onePlayer" && current !== HUMAN) return;
     if (gameOver) return;
 
     const idx = Number(e.currentTarget.dataset.index);
@@ -206,7 +249,7 @@ function onCellClick(e) {
     checkGameStatus();
 
     // If it's AI's turn, let AI move after a tiny delay
-    if (!gameOver && current === COMPUTER) {
+    if (gameMode === "onePlayer" && !gameOver && current === COMPUTER) {
         setTimeout(makeAiMove, 200);
     }
 }
@@ -253,20 +296,40 @@ function render(winLine = null) {
 
 function updateStatus(result = null) {
     if (!result || result.type === "none") {
-        const label = current === HUMAN ? "Human" : "Computer";
+        let label;
+        if (gameMode === "onePlayer") {
+            label = current === HUMAN ? "Human" : "Computer";
+        } else {
+            label = current === "X" ? "Player 1" : "Player 2";
+        }
         statusEl.textContent = `Turn: ${current} (${label})`;
         return;
     }
     if (result.type === "win") {
-        const label = result.winner === HUMAN ? "Human" : "Computer";
+        let label;
+        if (gameMode === "onePlayer") {
+            label = result.winner === HUMAN ? "Human" : "Computer";
+        } else {
+            label = result.winner === "X" ? "Player 1" : "Player 2";
+        }
         statusEl.textContent = `Winner: ${result.winner} (${label}) 🎉`;
         
-        if (result.winner === HUMAN) {
-            humanScore++;
-            humanScoreEl.textContent = humanScore;
+        if (gameMode === "onePlayer") {
+            if (result.winner === HUMAN) {
+                humanScore++;
+                humanScoreEl.textContent = humanScore;
+            } else {
+                computerScore++;
+                computerScoreEl.textContent = computerScore;
+            }
         } else {
-            computerScore++;
-            computerScoreEl.textContent = computerScore;
+            if (result.winner === "X") {
+                humanScore++;
+                humanScoreEl.textContent = humanScore;
+            } else {
+                computerScore++;
+                computerScoreEl.textContent = computerScore;
+            }
         }
         return;
     }
