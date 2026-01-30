@@ -12,6 +12,9 @@ const computerLabelEl = document.querySelector("#computerLabel");
 const onePlayerBtn = document.querySelector("#onePlayerBtn");
 const twoPlayerBtn = document.querySelector("#twoPlayerBtn");
 
+const startOption1 = document.querySelector("#startOption1");
+const startOption2 = document.querySelector("#startOption2");
+
 let humanScore = 0;
 let computerScore = 0;
 let tieScore = 0;
@@ -79,6 +82,9 @@ function init() {
         symbolSelect.style.display = "inline";
         document.querySelector('label[for="symbolSelect"]').style.display = "inline";
 
+        startOption1.textContent = "Player Starts";
+        startOption2.textContent = "AI Starts";
+
         if (startSelect.value === "human") {
             current = HUMAN;
         } else {
@@ -92,12 +98,21 @@ function init() {
         modeSelect.style.display = "none";
         // Hide labels too
         document.querySelector('label[for="modeSelect"]').style.display = "none";
-        document.querySelector('label[for="startSelect"]').style.display = "none";
-        startSelect.style.display = "none";
-        document.querySelector('label[for="symbolSelect"]').style.display = "none";
+        
+        startSelect.style.display = "inline";
+        document.querySelector('label[for="startSelect"]').style.display = "inline";
+        
         symbolSelect.style.display = "none";
+        document.querySelector('label[for="symbolSelect"]').style.display = "none";
 
-        current = "X";
+        startOption1.textContent = "Player 1 Starts";
+        startOption2.textContent = "Player 2 Starts";
+
+        if (startSelect.value === "human") {
+            current = "X";
+        } else {
+            current = "O";
+        }
     }
 
     // build 9 clickable cells at once
