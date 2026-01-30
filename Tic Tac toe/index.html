@@ -5,15 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe</title>
     <style>
-      body { font-family: system-ui; max-width: 520px; margin: 40px auto; background: #0505f6; color: #ff0000; }
+      body { font-family: system-ui; max-width: 520px; margin: 40px auto; background: #000000; color: #ffffff; }
       .top {display: flex; align-items: center; justify-content: space-between; gap: 12px;}
       #status {font-size: 1.1rem;}
       button { padding: 10px 14px; cursor: pointer;}
       .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px;}
-      .cell { height: 100px; font-size: 2rem; display: flex; align-items: center; justify-content: center; border: 1px solid #ff0000; background: #fbb000; }
+      .cell { height: 100px; font-size: 2rem; display: flex; align-items: center; justify-content: center; border: 1px solid #ff0000; background: #ffffff; }
       .cell:hover { background: #ff0000; }
       .win { background: #00ff3c; border-color: #000000; }
       .footer { text-align: center; margin-top: 30px; font-size: 1.5rem; font-weight: bold; }
+      .scoreboard {
+        display: flex;
+        justify-content: space-around;
+        background: #ffffff;
+        color: #fd0000;
+        padding: 20px;
+        margin-top: 20px;
+        border-radius: 8px;
+        text-align: center;
+      }
+      .score-item {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .score-label {
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+      .score-value {
+        font-size: 2rem;
+        font-weight: bold;
+      }
       </style>
 </head>
 <body>
@@ -36,6 +60,21 @@
   </div>
 
   <div class="board" id="board" role="grid" aria-label="Tic Tac Toe Board"></div>
+
+  <div class="scoreboard">
+    <div class="score-item">
+      <div class="score-label" id="humanLabel">PLAYER (X)</div>
+      <div class="score-value" id="humanScore">0</div>
+    </div>
+    <div class="score-item">
+      <div class="score-label">TIE</div>
+      <div class="score-value" id="tieScore">0</div>
+    </div>
+    <div class="score-item">
+      <div class="score-label" id="computerLabel">COMPUTER (O)</div>
+      <div class="score-value" id="computerScore">0</div>
+    </div>
+  </div>
 
   <div class="footer">Tic Tac Toe</div>
 

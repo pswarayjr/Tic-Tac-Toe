@@ -4,6 +4,16 @@ const resetBtn = document.querySelector("#resetBtn");
 const aiIndicator = document.querySelector("#aiIndicator");
 const startSelect = document.querySelector("#startSelect");
 const symbolSelect = document.querySelector("#symbolSelect");
+const humanScoreEl = document.querySelector("#humanScore");
+const computerScoreEl = document.querySelector("#computerScore");
+const tieScoreEl = document.querySelector("#tieScore");
+const humanLabelEl = document.querySelector("#humanLabel");
+const computerLabelEl = document.querySelector("#computerLabel");
+
+let humanScore = 0;
+let computerScore = 0;
+let tieScore = 0;
+
 let HUMAN = "X";
 let COMPUTER = "O";
 const modeSelect = document.querySelector("#modeSelect");
@@ -36,6 +46,9 @@ function init() {
 
     HUMAN = symbolSelect.value;
     COMPUTER = HUMAN === "X" ? "O" : "X";
+
+    humanLabelEl.textContent = `PLAYER (${HUMAN})`;
+    computerLabelEl.textContent = `COMPUTER (${COMPUTER})`;
 
     // "X" always goes first in this logic, but let's decide based on startSelect
     if (startSelect.value === "human") {
@@ -247,8 +260,18 @@ function updateStatus(result = null) {
     if (result.type === "win") {
         const label = result.winner === HUMAN ? "Human" : "Computer";
         statusEl.textContent = `Winner: ${result.winner} (${label}) 🎉`;
+        
+        if (result.winner === HUMAN) {
+            humanScore++;
+            humanScoreEl.textContent = humanScore;
+        } else {
+            computerScore++;
+            computerScoreEl.textContent = computerScore;
+        }
         return;
     }
+    tieScore++;
+    tieScoreEl.textContent = tieScore;
     statusEl.textContent = "It's a draw :(";
 }
 
