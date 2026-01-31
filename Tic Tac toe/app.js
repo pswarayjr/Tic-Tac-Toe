@@ -4,6 +4,8 @@ const resetBtn = document.querySelector("#resetBtn");
 const aiIndicator = document.querySelector("#aiIndicator");
 const startSelect = document.querySelector("#startSelect");
 const symbolSelect = document.querySelector("#symbolSelect");
+const symbolSelect2P = document.querySelector("#symbolSelect2P");
+const label2P = document.querySelector("#label2P");
 const humanScoreEl = document.querySelector("#humanScore");
 const computerScoreEl = document.querySelector("#computerScore");
 const tieScoreEl = document.querySelector("#tieScore");
@@ -49,6 +51,9 @@ startSelect.addEventListener("change", () => {
 symbolSelect.addEventListener("change", () => {
     init();
 });
+symbolSelect2P.addEventListener("change", () => {
+    init();
+});
 let aiMode = "heuristic";
 
 let board;        // array of 9: null | "X" | "O"
@@ -65,10 +70,10 @@ function init() {
     board = Array(9).fill(null);
     gameOver = false;
 
-    HUMAN = symbolSelect.value;
-    COMPUTER = HUMAN === "X" ? "O" : "X";
-
     if (gameMode === "onePlayer") {
+        HUMAN = symbolSelect.value;
+        COMPUTER = HUMAN === "X" ? "O" : "X";
+        
         humanLabelEl.textContent = `PLAYER (${HUMAN})`;
         computerLabelEl.textContent = `COMPUTER (${COMPUTER})`;
         aiIndicator.style.display = "block";
@@ -81,6 +86,9 @@ function init() {
         
         symbolSelect.style.display = "inline";
         document.querySelector('label[for="symbolSelect"]').style.display = "inline";
+        
+        symbolSelect2P.style.display = "none";
+        label2P.style.display = "none";
 
         startOption1.textContent = "Player Starts";
         startOption2.textContent = "AI Starts";
@@ -92,8 +100,17 @@ function init() {
         }
     } else {
         // twoPlayer mode
-        humanLabelEl.textContent = `PLAYER 1 (X)`;
-        computerLabelEl.textContent = `PLAYER 2 (O)`;
+        let p1Symbol, p2Symbol;
+        if (symbolSelect2P.value === "p1") {
+            p1Symbol = "X";
+            p2Symbol = "O";
+        } else {
+            p1Symbol = "O";
+            p2Symbol = "X";
+        }
+
+        humanLabelEl.textContent = `PLAYER 1 (${p1Symbol})`;
+        computerLabelEl.textContent = `PLAYER 2 (${p2Symbol})`;
         aiIndicator.style.display = "none";
         modeSelect.style.display = "none";
         // Hide labels too
@@ -104,14 +121,17 @@ function init() {
         
         symbolSelect.style.display = "none";
         document.querySelector('label[for="symbolSelect"]').style.display = "none";
+        
+        symbolSelect2P.style.display = "inline";
+        label2P.style.display = "inline";
 
         startOption1.textContent = "Player 1 Starts";
         startOption2.textContent = "Player 2 Starts";
 
         if (startSelect.value === "human") {
-            current = "X";
+            current = p1Symbol;
         } else {
-            current = "O";
+            current = p2Symbol;
         }
     }
 
@@ -315,17 +335,31 @@ function updateStatus(result = null) {
         if (gameMode === "onePlayer") {
             label = current === HUMAN ? "Human" : "Computer";
         } else {
-            label = current === "X" ? "Player 1" : "Player 2";
+            let p1Symbol;
+            if (symbolSelect2P.value === "p1") {
+                p1Symbol = "X";
+            } else {
+                p1Symbol = "O";
+            }
+            label = current === p1Symbol ? "Player 1" : "Player 2";
         }
         statusEl.textContent = `Turn: ${current} (${label})`;
         return;
     }
     if (result.type === "win") {
         let label;
-        if (gameMode === "onePlayer") {
-            label = result.winner === HUMAN ? "Human" : "Computer";
+        let p1Symbol, p2Symbol;
+        if (gameMode === "twoPlayer") {
+            if (symbolSelect2P.value === "p1") {
+                p1Symbol = "X";
+                p2Symbol = "O";
+            } else {
+                p1Symbol = "O";
+                p2Symbol = "X";
+            }
+            label = result.winner === p1Symbol ? "Player 1" : "Player 2";
         } else {
-            label = result.winner === "X" ? "Player 1" : "Player 2";
+            label = result.winner === HUMAN ? "Human" : "Computer";
         }
         statusEl.textContent = `Winner: ${result.winner} (${label}) 🎉`;
         
@@ -338,7 +372,7 @@ function updateStatus(result = null) {
                 computerScoreEl.textContent = computerScore;
             }
         } else {
-            if (result.winner === "X") {
+            if (result.winner === p1Symbol) {
                 humanScore++;
                 humanScoreEl.textContent = humanScore;
             } else {
