@@ -348,14 +348,12 @@ function updateStatus(result = null) {
     }
     if (result.type === "win") {
         let label;
-        let p1Symbol, p2Symbol;
+        let p1Symbol;
         if (gameMode === "twoPlayer") {
             if (symbolSelect2P.value === "p1") {
                 p1Symbol = "X";
-                p2Symbol = "O";
             } else {
                 p1Symbol = "O";
-                p2Symbol = "X";
             }
             label = result.winner === p1Symbol ? "Player 1" : "Player 2";
         } else {
@@ -366,24 +364,24 @@ function updateStatus(result = null) {
         if (gameMode === "onePlayer") {
             if (result.winner === HUMAN) {
                 humanScore++;
-                humanScoreEl.textContent = humanScore;
+                humanScoreEl.textContent = String(humanScore);
             } else {
                 computerScore++;
-                computerScoreEl.textContent = computerScore;
+                computerScoreEl.textContent = String(computerScore);
             }
         } else {
             if (result.winner === p1Symbol) {
                 humanScore++;
-                humanScoreEl.textContent = humanScore;
+                humanScoreEl.textContent = String(humanScore);
             } else {
                 computerScore++;
-                computerScoreEl.textContent = computerScore;
+                computerScoreEl.textContent = String(computerScore);
             }
         }
         return;
     }
     tieScore++;
-    tieScoreEl.textContent = tieScore;
+    tieScoreEl.textContent = String(tieScore);
     statusEl.textContent = "It's a draw :(";
 }
 
